@@ -1,0 +1,68 @@
+{
+    "VRETR":{
+        "summary": "Retrieve the simdocids of a docid in a key", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "key",
+                "type": "key"
+            },
+            {
+                "name": "docid",
+                "type": "integer"
+            }
+        ],
+        "since": "0.0.0",
+        "group": "simbase"
+    },
+    "VGET":{
+        "summary": "Get the probs of a docid in a key", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "key",
+                "type": "key"
+            },
+            {
+                "name": "docid",
+                "type": "integer"
+            }
+        ],
+        "since": "0.0.0",
+        "group": "simbase"
+    },
+    "VADD":{
+        "summary": "Add a doc of a key", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "key",
+                "type": "key"
+            },
+            {
+                "name": "docid",
+                "type": "integer"
+            },
+            {
+                "name": "prob",
+                "type": "double",
+                "multiple": true
+            }
+        ],
+        "since": "0.0.0",
+        "group": "simbase"
+    },
+    "VDEL":{
+        "summary": "Del a doc of a key", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "key",
+                "type": "key"
+            },
+            {
+                "name": "docid",
+                "type": "integer"
+            }
+        ],
+        "since": "0.0.0",
+        "group": "simbase"
+    }
+}
+

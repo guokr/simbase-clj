@@ -1,9 +1,9 @@
 {
     "VRETR":{
-        "summary": "Retrieve the simdocids of a docid in a key", "complexity": "O(1)",
+        "summary": "Retrieve some similar documents of a document specified by the doctype and docid", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "key",
+                "name": "doctype",
                 "type": "key"
             },
             {
@@ -15,10 +15,10 @@
         "group": "simbase"
     },
     "VGET":{
-        "summary": "Get the probs of a docid in a key", "complexity": "O(1)",
+        "summary": "Get the probabilities of a document specified by the doctype and docid", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "key",
+                "name": "doctype",
                 "type": "key"
             },
             {
@@ -30,10 +30,10 @@
         "group": "simbase"
     },
     "VADD":{
-        "summary": "Add a doc of a key", "complexity": "O(1)",
+        "summary": "Add a document specified by the doctype, docid and probabilities", "complexity": "O(n)",
         "arguments": [
             {
-                "name": "key",
+                "name": "doctype",
                 "type": "key"
             },
             {
@@ -41,7 +41,7 @@
                 "type": "integer"
             },
             {
-                "name": "prob",
+                "name": "probs",
                 "type": "double",
                 "multiple": true
             }
@@ -50,10 +50,10 @@
         "group": "simbase"
     },
     "VDEL":{
-        "summary": "Del a doc of a key", "complexity": "O(1)",
+        "summary": "Delete a document specified by the doctype and docid", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "key",
+                "name": "doctype",
                 "type": "key"
             },
             {

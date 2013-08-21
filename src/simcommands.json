@@ -1,4 +1,24 @@
 {
+    "VADD":{
+        "summary": "Add a document specified by the doctype, docid and probabilities", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "doctype",
+                "type": "key"
+            },
+            {
+                "name": "docid",
+                "type": "integer"
+            },
+            {
+                "name": "probs",
+                "type": "double",
+                "multiple": true
+            }
+        ],
+        "since": "0.0.0",
+        "group": "simbase"
+    },
     "VRETR":{
         "summary": "Retrieve some similar documents of a document specified by the doctype and docid", "complexity": "O(1)",
         "arguments": [
@@ -29,8 +49,8 @@
         "since": "0.0.0",
         "group": "simbase"
     },
-    "VADD":{
-        "summary": "Add a document specified by the doctype, docid and probabilities", "complexity": "O(n)",
+    "VPUT":{
+        "summary": "Update a document specified by the doctype, docid and probabilities", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "doctype",

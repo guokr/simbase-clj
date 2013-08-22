@@ -1,4 +1,31 @@
 {
+    "VSCH":{
+        "summary": "Get the schema of a specified doctype", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "doctype",
+                "type": "key"
+            }
+        ],
+        "since": "0.0.0",
+        "group": "simbase"
+    },
+    "VREV":{
+        "summary": "Revise the schema for a specified doctype", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "doctype",
+                "type": "key"
+            },
+            {
+                "name": "schema",
+                "type": "string",
+                "multiple": true
+            }
+        ],
+        "since": "0.0.0",
+        "group": "simbase"
+    },
     "VADD":{
         "summary": "Add a document specified by the doctype, docid and probabilities", "complexity": "O(n)",
         "arguments": [

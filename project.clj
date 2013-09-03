@@ -1,4 +1,4 @@
-(defproject com.guokr/simbase-clj "0.0.0"
+(defproject com.guokr/simbase-clj "0.0.1"
 
     :description "A clojure client for simbase document similarity server"
     :url "https://github.com/guokr/simbase-clj/"

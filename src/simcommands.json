@@ -67,7 +67,7 @@
         "group": "simbase"
     },
     "VRETR":{
-        "summary": "Retrieve some similar documents of a document specified by the doctype and docid", "complexity": "O(1)",
+        "summary": "Retrieve some similar documents with similarity of a document specified by the doctype and docid", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "doctype",
@@ -94,6 +94,21 @@
             }
         ],
         "since": "0.0.0",
+        "group": "simbase"
+    },
+    "VREC":{
+        "summary": "Recommend some similar documents of a document specified by the doctype and docid", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "doctype",
+                "type": "key"
+            },
+            {
+                "name": "docid",
+                "type": "integer"
+            }
+        ],
+        "since": "0.0.1",
         "group": "simbase"
     },
     "VPUT":{

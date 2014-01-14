@@ -1,20 +1,66 @@
 {
-    "VSCH":{
-        "summary": "Get the schema of a specified doctype", "complexity": "O(1)",
+    "save":{
+        "summary": "Save all data to dmp files to data dir", "complexity": "O(n)",
+        "arguments": [],
+        "since": "0.1.0",
+        "group": "general"
+    },
+    "load":{
+        "summary": "Load all dmp files from data dir", "complexity": "O(n)",
+        "arguments": [],
+        "since": "0.1.0",
+        "group": "general"
+    },
+    "del":{
+        "summary": "Delete a base, vectorset, or recommendation", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "key",
                 "type": "key"
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "general"
     },
-    "VREV":{
-        "summary": "Revise the schema for a specified doctype", "complexity": "O(1)",
+
+    "bsave":{
+        "summary": "Save all data of a base", "complexity": "O(n)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "bkey",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "base"
+    },
+    "bload":{
+        "summary": "Load a base from a dmp file in data dir", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "bkey",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "base"
+    },
+    "blist":{
+        "summary": "List all bases", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "bkey",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "base"
+    },
+    "bmk":{
+        "summary": "Make a new base", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "bkey",
                 "type": "key"
             },
             {
@@ -23,148 +69,296 @@
                 "multiple": true
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "base"
     },
-    "VADD":{
-        "summary": "Add a document specified by the doctype, docid and probabilities", "complexity": "O(n)",
+    "bget":{
+        "summary": "Get the schema of a base", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "bkey",
                 "type": "key"
-            },
-            {
-                "name": "docid",
-                "type": "integer"
-            },
-            {
-                "name": "probs",
-                "type": "double",
-                "multiple": true
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "base"
     },
-    "VAPND":{
-        "summary": "Append a document specified by the doctype, docid and name-value pairs", "complexity": "O(n)",
+    "brev":{
+        "summary": "Revise the schema of a base", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "bkey",
                 "type": "key"
             },
             {
-                "name": "docid",
-                "type": "integer"
-            },
-            {
-                "name": "pairs",
+                "name": "schema",
                 "type": "string",
                 "multiple": true
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "base"
     },
-    "VRETR":{
-        "summary": "Retrieve some similar documents with similarity of a document specified by the doctype and docid", "complexity": "O(1)",
+
+    "vlist":{
+        "summary": "List all vectorsets under a base", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "bkey",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+    "vmk":{
+        "summary": "List all vectorsets under a base", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "bkey",
                 "type": "key"
             },
             {
-                "name": "docid",
+                "name": "vkey",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+    "vrem":{
+        "summary": "Remove a vector in a vectorset", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
                 "type": "integer"
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "vectorset"
     },
-    "VGET":{
-        "summary": "Get the probabilities of a document specified by the doctype and docid", "complexity": "O(1)",
+    "vadd":{
+        "summary": "Add a vector to a vectorset, if exists, ignore", "complexity": "O(n)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "vkey",
                 "type": "key"
             },
             {
-                "name": "docid",
-                "type": "integer"
-            }
-        ],
-        "since": "0.0.0",
-        "group": "simbase"
-    },
-    "VREC":{
-        "summary": "Recommend some similar documents of a document specified by the doctype and docid", "complexity": "O(1)",
-        "arguments": [
-            {
-                "name": "doctype",
-                "type": "key"
-            },
-            {
-                "name": "docid",
-                "type": "integer"
-            }
-        ],
-        "since": "0.0.1",
-        "group": "simbase"
-    },
-    "VPUT":{
-        "summary": "Update a document specified by the doctype, docid and probabilities", "complexity": "O(n)",
-        "arguments": [
-            {
-                "name": "doctype",
-                "type": "key"
-            },
-            {
-                "name": "docid",
+                "name": "vecid",
                 "type": "integer"
             },
             {
-                "name": "probs",
-                "type": "double",
+                "name": "value",
+                "type": "float",
                 "multiple": true
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "vectorset"
     },
-    "VUPDT":{
-        "summary": "Update a document specified by the doctype, docid and name-value pairs", "complexity": "O(n)",
+    "vget":{
+        "summary": "Get a vector from a vectorset", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "vkey",
                 "type": "key"
             },
             {
-                "name": "docid",
+                "name": "vecid",
+                "type": "integer"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+    "vadd":{
+        "summary": "Add a vector to a vectorset, if exists, replace it", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
                 "type": "integer"
             },
             {
-                "name": "pairs",
-                "type": "string",
+                "name": "value",
+                "type": "float",
                 "multiple": true
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "vectorset"
     },
-    "VDEL":{
-        "summary": "Delete a document specified by the doctype and docid", "complexity": "O(1)",
+    "vacc":{
+        "summary": "Accumalate a vector to a vector in vectorset", "complexity": "O(n)",
         "arguments": [
             {
-                "name": "doctype",
+                "name": "vkey",
                 "type": "key"
             },
             {
-                "name": "docid",
+                "name": "vecid",
+                "type": "integer"
+            },
+            {
+                "name": "value",
+                "type": "float",
+                "multiple": true
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+    "iadd":{
+        "summary": "Add a vector to a vectorset with position, value pairs, if exists, ignore", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
+                "type": "integer"
+            },
+            {
+                "name": "pair",
+                "type": "integer",
+                "multiple": true
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+    "iget":{
+        "summary": "Get a sparse vector from a vectorset", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
                 "type": "integer"
             }
         ],
-        "since": "0.0.0",
-        "group": "simbase"
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+    "iset":{
+        "summary": "Set a vector to a vectorset with position, value pairs, if exists, replace it", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
+                "type": "integer"
+            },
+            {
+                "name": "pair",
+                "type": "integer",
+                "multiple": true
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+    "iacc":{
+        "summary": "Accumalate a vector with position, value pair to a vector in vectorset", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
+                "type": "integer"
+            },
+            {
+                "name": "pair",
+                "type": "integar",
+                "multiple": true
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vectorset"
+    },
+
+    "rlist":{
+        "summary": "List all recommendations under a vecterset", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "recommendation"
+    },
+    "rmk":{
+        "summary": "Make a recommendation between two vectorsets with a score function", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "vkeysource",
+                "type": "key"
+            },
+            {
+                "name": "vkeytarget",
+                "type": "key"
+            },
+            {
+                "name": "scorefunction",
+                "type": "string"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "recommendation"
+    },
+    "rget":{
+        "summary": "Get a recommendation with score", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "vkeysource",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
+                "type": "key"
+            },
+            {
+                "name": "vkeytarget",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "recommendation"
+    },
+    "rrec":{
+        "summary": "Get a recommendation", "complexity": "O(1)",
+        "arguments": [
+            {
+                "name": "vkeysource",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
+                "type": "key"
+            },
+            {
+                "name": "vkeytarget",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "recommendation"
     }
 }
 

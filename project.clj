@@ -1,4 +1,4 @@
-(defproject com.guokr/simbase-clj "0.0.1"
+(defproject com.guokr/simbase-clj "0.1.0"
 
     :description "A clojure client for simbase document similarity server"
     :url "https://github.com/guokr/simbase-clj/"
@@ -9,7 +9,7 @@
             :comments "same as Clojure"}
 
     :dependencies [[org.clojure/clojure "1.5.1"]
-                   [com.taoensso/carmine "2.0.0"]]
+                   [com.taoensso/carmine "2.4.4"]]
     :source-paths ["src"]
 
     :compile-path "target/classes"

@@ -1,18 +1,24 @@
 {
+    "ping":{
+        "summary": "ping", "complexity": "O(1)",
+        "arguments": [],
+        "since": "0.1.0",
+        "group": "general"
+    },
     "save":{
-        "summary": "Save all data to dmp files to data dir", "complexity": "O(n)",
+        "summary": "Save all data to dump files to data dir", "complexity": "O(n)",
         "arguments": [],
         "since": "0.1.0",
         "group": "general"
     },
     "load":{
-        "summary": "Load all dmp files from data dir", "complexity": "O(n)",
+        "summary": "Load all dump files from data dir", "complexity": "O(n)",
         "arguments": [],
         "since": "0.1.0",
         "group": "general"
     },
     "del":{
-        "summary": "Delete a base, vectorset, or recommendation", "complexity": "O(1)",
+        "summary": "Delete a base, vector set, or recommendation", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "key",
@@ -35,7 +41,7 @@
         "group": "base"
     },
     "bload":{
-        "summary": "Load a base from a dmp file in data dir", "complexity": "O(n)",
+        "summary": "Load a base from a dump file in data dir", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "bkey",
@@ -48,10 +54,6 @@
     "blist":{
         "summary": "List all bases", "complexity": "O(1)",
         "arguments": [
-            {
-                "name": "bkey",
-                "type": "key"
-            }
         ],
         "since": "0.1.0",
         "group": "base"
@@ -101,7 +103,7 @@
     },
 
     "vlist":{
-        "summary": "List all vectorsets under a base", "complexity": "O(1)",
+        "summary": "List all vector sets under a base", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "bkey",
@@ -109,10 +111,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "vmk":{
-        "summary": "List all vectorsets under a base", "complexity": "O(1)",
+        "summary": "List all vector sets under a base", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "bkey",
@@ -124,10 +126,21 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
+    },
+    "vids":{
+        "summary": "List all vector ids in a vector set", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vector set"
     },
     "vrem":{
-        "summary": "Remove a vector in a vectorset", "complexity": "O(1)",
+        "summary": "Remove a vector in a vector set", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "vkey",
@@ -139,10 +152,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "vadd":{
-        "summary": "Add a vector to a vectorset, if exists, ignore", "complexity": "O(n)",
+        "summary": "Add a vector to a vecto rset, if exists, ignore the operation", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "vkey",
@@ -162,7 +175,7 @@
         "group": "vectorset"
     },
     "vget":{
-        "summary": "Get a vector from a vectorset", "complexity": "O(1)",
+        "summary": "Get a vector from a vector set", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "vkey",
@@ -174,10 +187,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "vadd":{
-        "summary": "Add a vector to a vectorset, if exists, replace it", "complexity": "O(n)",
+        "summary": "Add a vector to a vector set, if exists, replace it", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "vkey",
@@ -194,10 +207,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "vacc":{
-        "summary": "Accumalate a vector to a vector in vectorset", "complexity": "O(n)",
+        "summary": "Accumulate a vector to a specific vector in vector set", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "vkey",
@@ -214,10 +227,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "iadd":{
-        "summary": "Add a vector to a vectorset with position, value pairs, if exists, ignore", "complexity": "O(n)",
+        "summary": "Add a vector to a vector set with position, value pairs, if exists, ignore", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "vkey",
@@ -234,10 +247,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "iget":{
-        "summary": "Get a sparse vector from a vectorset", "complexity": "O(1)",
+        "summary": "Get a sparse vector from a vector set", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "vkey",
@@ -249,10 +262,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "iset":{
-        "summary": "Set a vector to a vectorset with position, value pairs, if exists, replace it", "complexity": "O(n)",
+        "summary": "Set a vector to a vector set with position, value pairs, if exists, replace it", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "vkey",
@@ -269,10 +282,10 @@
             }
         ],
         "since": "0.1.0",
-        "group": "vectorset"
+        "group": "vector set"
     },
     "iacc":{
-        "summary": "Accumalate a vector with position, value pair to a vector in vectorset", "complexity": "O(n)",
+        "summary": "Accumulate a vector with position, value pair to a vector in vector set", "complexity": "O(n)",
         "arguments": [
             {
                 "name": "vkey",
@@ -293,7 +306,7 @@
     },
 
     "rlist":{
-        "summary": "List all recommendations under a vecterset", "complexity": "O(1)",
+        "summary": "List all recommendations under a vector set", "complexity": "O(1)",
         "arguments": [
             {
                 "name": "vkey",
@@ -304,18 +317,18 @@
         "group": "recommendation"
     },
     "rmk":{
-        "summary": "Make a recommendation between two vectorsets with a score function", "complexity": "O(1)",
+        "summary": "Make a recommendation between two vector sets with a score function", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "vkeysource",
+                "name": "sourceVKey",
                 "type": "key"
             },
             {
-                "name": "vkeytarget",
+                "name": "targetVKey",
                 "type": "key"
             },
             {
-                "name": "scorefunction",
+                "name": "scoreFunction",
                 "type": "string"
             }
         ],
@@ -323,10 +336,10 @@
         "group": "recommendation"
     },
     "rget":{
-        "summary": "Get a recommendation with score", "complexity": "O(1)",
+        "summary": "Get a recommendation list with score", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "vkeysource",
+                "name": "sourceVKey",
                 "type": "key"
             },
             {
@@ -334,7 +347,7 @@
                 "type": "key"
             },
             {
-                "name": "vkeytarget",
+                "name": "targetVKey",
                 "type": "key"
             }
         ],
@@ -342,10 +355,10 @@
         "group": "recommendation"
     },
     "rrec":{
-        "summary": "Get a recommendation", "complexity": "O(1)",
+        "summary": "Get a recommendation list without score", "complexity": "O(1)",
         "arguments": [
             {
-                "name": "vkeysource",
+                "name": "sourceVKey",
                 "type": "key"
             },
             {
@@ -353,7 +366,7 @@
                 "type": "key"
             },
             {
-                "name": "vkeytarget",
+                "name": "targetVKey",
                 "type": "key"
             }
         ],

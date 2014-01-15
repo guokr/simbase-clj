@@ -1,6 +1,6 @@
 (ns simbase.carmine "Clojure Redis client & message queue."
   {:author "Peter Taoussanis"}
-  (:refer-clojure :exclude [time get set keys type sync sort eval])
+  (:refer-clojure :exclude [time get set key keys type sync sort eval])
   (:require [clojure.string :as str]
             [simbase.commands :as commands]
             [taoensso.carmine
@@ -11,6 +11,8 @@
             [taoensso.nippy.tools :as nippy-tools]))
 
 ;;;; Connections
+
+(utils/defalias with-replies protocol/with-replies)
 
 (defmacro wcar
   "Evaluates body in the context of a thread-bound pooled connection to Redis
@@ -27,18 +29,25 @@
 
   A `nil` or `{}` `conn` or opts will use defaults. A `:none` pool can be used
   to skip connection pooling. For other pool options, Ref. http://goo.gl/EiTbn."
-  [conn & body]
+  {:arglists '([conn :as-pipeline & body] [conn & body])}
+  [conn & sigs]
   `(let [{pool-opts# :pool spec-opts# :spec} ~conn
          [pool# conn#] (conns/pooled-conn pool-opts# spec-opts#)]
      (try
-       (let [response# (protocol/with-context conn# ~@body)]
+       (let [response# (protocol/with-context conn#
+                         (with-replies ~@sigs))]
          (conns/release-conn pool# conn#)
          response#)
        (catch Exception e# (conns/release-conn pool# conn# e#) (throw e#)))))
 
-(comment (wcar {} (ping) "not-a-Redis-command" (ping))
-         (with-open [p (conns/conn-pool {})]
-           (wcar {:pool p} (ping) (ping))))
+(comment
+  (wcar {} (ping) "not-a-Redis-command" (ping))
+  (with-open [p (conns/conn-pool {})] (wcar {:pool p} (ping) (ping)))
+  (wcar {} (ping))
+  (wcar {} :as-pipeline (ping))
+
+  (wcar {} (echo 1) (println (with-replies (ping))) (echo 2))
+  (wcar {} (echo 1) (println (with-replies :as-pipeline (ping))) (echo 2)))
 
 ;;;; Misc
 
@@ -53,29 +62,47 @@
                             (throw (Exception. (str "Couldn't coerce as bool: "
                                                     x))))))
 
-(defmacro parse
-  "Wraps body so that replies to any wrapped Redis commands will be parsed with
-  `(f reply)`. Replaces any current parser; removes parser when `f` is nil."
-  [f & body] `(binding [protocol/*parser* ~f] ~@body))
+(utils/defalias parse       protocol/parse)
+(utils/defalias parser-comp protocol/parser-comp)
 
 (defmacro parse-long    [& body] `(parse as-long   ~@body))
 (defmacro parse-double  [& body] `(parse as-double ~@body))
 (defmacro parse-bool    [& body] `(parse as-bool   ~@body))
 (defmacro parse-keyword [& body] `(parse keyword   ~@body))
 (defmacro parse-raw     [& body] `(parse (with-meta identity {:raw? true}) ~@body))
+(defmacro parse-nippy [thaw-opts & body]
+  `(parse (with-meta identity {:thaw-opts ~thaw-opts}) ~@body))
 
-(defn kname
-  "Joins keywords, integers, and strings to form an idiomatic compound Redis key
-  name.
+(defn as-map [coll & [kf vf]]
+  {:pre  [(coll? coll) (or (nil? kf) (fn? kf) (identical? kf :keywordize))
+                       (or (nil? vf) (fn? vf))]
+   :post [(or (nil? %) (map? %))]}
+  (when-let [s' (seq coll)]
+    (let [kf (if-not (identical? kf :keywordize) kf
+                     (fn [k _] (keyword k)))]
+      (loop [m (transient {}) [k v :as s] s']
+        (let [k (if-not kf k (kf k v))
+              v (if-not vf v (vf k v))
+              new-m (assoc! m k v)]
+          (if-let [n (nnext s)]
+            (recur new-m n)
+            (persistent! new-m)))))))
 
-  Suggested key naming style:
+(comment (as-map ["a" "A" "b" "B" "c" "C"] :keywordize
+           (fn [k v] (case k (:a :b) (str "boo-" v) v))))
+
+(defmacro parse-map [form & [kf vf]] `(parse #(as-map % ~kf ~vf) ~form))
+
+(defn key
+  "Joins parts to form an idiomatic compound Redis key name. Suggested style:
     * \"category:subcategory:id:field\" basic form.
     * Singular category names (\"account\" rather than \"accounts\").
+    * Plural _field_ names when appropriate (\"account:friends\").
     * Dashes for long names (\"email-address\" rather than \"emailAddress\", etc.)."
+  [& parts] (str/join ":" (mapv #(if (keyword? %) (utils/fq-name %) (str %))
+                                parts)))
 
-  [& parts] (str/join ":" (map utils/keyname (filter identity parts))))
-
-(comment (kname :foo/bar :baz "qux" nil 10))
+(comment (key :foo/bar :baz "qux" nil 10))
 
 (utils/defalias raw            protocol/raw)
 (utils/defalias with-thaw-opts nippy-tools/with-thaw-opts)
@@ -83,39 +110,9 @@
   "Forces argument of any type (incl. keywords, simple numbers, and binary types)
   to be subject to automatic de/serialization with Nippy.")
 
-(defn return
-  "Special command that takes any value and returns it unchanged as part of
-  an enclosing `wcar` pipeline response."
-  [value]
-  (let [vfn (constantly value)]
-    (swap! (:parser-queue protocol/*context*) conj
-           (with-meta (if-let [p protocol/*parser*] (comp p vfn) vfn)
-             {:dummy-reply? true}))))
-
+(utils/defalias return protocol/return)
 (comment (wcar {} (return :foo) (ping) (return :bar))
          (wcar {} (parse name (return :foo)) (ping) (return :bar)))
-
-(defmacro with-replies
-  "Alpha - subject to change.
-  Evaluates body, immediately returning the server's response to any contained
-  Redis commands (i.e. before enclosing `wcar` ends). Ignores any parser
-  in enclosing (not _enclosed_) context.
-
-  As an implementation detail, stashes and then `return`s any replies already
-  queued with Redis server: i.e. should be compatible with pipelining."
-  {:arglists '([:as-pipeline & body] [& body])}
-  [& [s1 & sn :as sigs]]
-  (let [as-pipeline? (= s1 :as-pipeline)
-        body (if as-pipeline? sn sigs)]
-    `(let [stashed-replies# (protocol/get-replies true)]
-       (try (parse nil ~@body) ; Herewith dragons; tread lightly
-            (protocol/get-replies ~as-pipeline?)
-            (finally
-             ;; doseq here broken with Clojure <1.5, Ref. http://goo.gl/5DvRt
-             (parse nil (dorun (map return stashed-replies#))))))))
-
-(comment (wcar {} (echo 1) (println (with-replies (ping))) (echo 2))
-         (wcar {} (echo 1) (println (with-replies :as-pipeline (ping))) (echo 2)))
 
 ;;;; Standard commands
 
@@ -137,36 +134,91 @@
 (comment (wcar {} (redis-call [:set "foo" "bar"] [:get "foo"]
                               [:config-get "*max-*-entries*"])))
 
-(defmacro atomically
-  "Executes all Redis commands in body as a single transaction and returns
-  server response vector or an empty vector if transaction failed.
+(defmacro atomic
+  "Alpha - subject to change!!
+  Tool to ease Redis transactions for fun & profit. Wraps body in a `wcar`
+  call that terminates with `exec`, cleans up reply, and supports automatic
+  retry for failed optimistic locking.
 
-  Body may contain a (discard) call to abort transaction."
-  [watch-keys & body]
-  `(do
-     (with-replies ; discard "OK" and "QUEUED" replies
-       (when-let [wk# (seq ~watch-keys)] (apply watch wk#))
-       (multi)
-       ~@body)
+  Body must contain a `multi` call and may contain calls to: `watch`, `unwatch`,
+  `discard`, etc. Ref. http://redis.io/topics/transactions for more info.
 
-     ;; Body discards will result in an (exec) exception:
-     (parse #(if (instance? Exception %) [] %) (exec))))
+  `return` and `parse` NOT supported after `multi` has been called.
 
-(defmacro ensure-atomically
-  "Repeatedly calls `atomically` on body until transaction succeeds or
-  given limit is hit, in which case an exception will be thrown."
-  [{:keys [max-tries]
-    :or   {max-tries 100}}
-   watch-keys & body]
-  `(let [watch-keys# ~watch-keys
-         max-idx#    ~max-tries]
-     (loop [idx# 0]
-       (let [result# (with-replies (atomically watch-keys# ~@body))]
-         (if (not= [] result#)
-           (remember result#)
-           (if (= idx# max-idx#)
-             (throw (Exception. (str "`ensure-atomically` failed after " idx#
-                                     " attempts")))
-             (recur (inc idx#))))))))
+  Like `swap!` fn, body may be called multiple times so should avoid impure or
+  expensive ops.
 
-(comment (wcar {} (ensure-atomically {} [:foo] (set :foo "new-val") (get :foo))))
+  ;;; Atomically increment integer key without using INCR
+  (atomic {} 100 ; Retry <= 100 times on failed optimistic lock, or throw ex
+
+    (watch  :my-int-key) ; Watch key for changes
+    (let [curr-val (-> (wcar {} ; Note additional connection!
+                         (get :my-int-key)) ; Use val of watched key
+                       (as-long)
+                       (or 0))]
+      (return curr-val)
+
+      (multi) ; Start the transaction
+        (set :my-int-key (inc curr-val))
+        (get :my-int-key)
+      ))
+  => [[\"OK\" nil \"OK\" \"QUEUED\" \"QUEUED\"] ; Prelude replies
+      [\"OK\" \"1\"] ; Transaction replies (`exec` reply)
+      ]
+
+  See also `lua` as an alternative method of achieving transactional behaviour."
+  [conn max-cas-attempts & body]
+  (assert (>= max-cas-attempts 1))
+  `(let [conn#       ~conn
+         max-idx#    ~max-cas-attempts
+         prelude-result# (atom nil)
+         exec-result#
+         (wcar :as-pipeline ; To ensure `peek` is always valid
+           conn# ; Hold 1 conn for all attempts
+           (loop [idx# 1]
+             (try (do ~@body)
+                  (catch Exception e#
+                    (discard) ; Always return conn to normal state
+                    (throw e#)))
+             (reset! prelude-result# (protocol/get-parsed-replies :as-pipeline))
+             (let [r# (->> (with-replies (exec))
+                           (parse nil) ; Nb
+                           )]
+               (if (not= r# []) ; => empty `mutli` or watched key changed
+                 (return r#)
+                 (if (= idx# max-idx#)
+                   (throw (Exception. (format "`atomic` failed after %s attempt(s)"
+                                              idx#)))
+                   (recur (inc idx#)))))))]
+
+     [@prelude-result#
+      ;; Mimic normal `get-parsed-replies` behaviour here re: vectorized replies:
+      (let [r# exec-result#]
+        (if (next r#) r#
+            (let [r# (nth r# 0)]
+              (if (instance? Exception r#) (throw r#) r#))))]))
+
+(comment
+  ;; Error before exec (=> syntax, etc.)
+  (wcar {} (multi) (redis-call [:invalid]) (ping) (exec))
+  ;; ["OK" #<Exception: ERR unknown command 'INVALID'> "QUEUED"
+  ;;  #<Exception: EXECABORT Transaction discarded because of previous errors.>]
+
+  ;; Error during exec (=> datatype, etc.)
+  (wcar {} (set "aa" "string") (multi) (ping) (incr "aa") (ping) (exec))
+  ;; ["OK" "OK" "QUEUED" "QUEUED" "QUEUED"
+  ;;  ["PONG" #<Exception: ERR value is not an integer or out of range> "PONG"]]
+
+  (wcar {} (multi) (ping) (discard)) ; ["OK" "QUEUED" "OK"]
+  (wcar {} (multi) (ping) (discard) (exec))
+  ;; ["OK" "QUEUED" "OK" #<Exception: ERR EXEC without MULTI>]
+
+  (wcar {} (watch "aa") (set "aa" "string") (multi) (ping) (exec))
+  ;; ["OK" "OK" "OK" "QUEUED" []]
+
+  (wcar {} (watch "aa") (set "aa" "string") (unwatch) (multi) (ping) (exec))
+  ;; ["OK" "OK" "OK" "OK" "QUEUED" ["PONG"]]
+
+  (wcar {} (multi) (multi))
+  ;; ["OK" #<Exception java.lang.Exception: ERR MULTI calls can not be nested>]
+  )

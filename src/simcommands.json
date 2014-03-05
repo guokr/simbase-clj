@@ -190,6 +190,26 @@
         "group": "vector set"
     },
     "vadd":{
+        "summary": "Add a vector to a vector set, if exists, ignore", "complexity": "O(n)",
+        "arguments": [
+            {
+                "name": "vkey",
+                "type": "key"
+            },
+            {
+                "name": "vecid",
+                "type": "integer"
+            },
+            {
+                "name": "value",
+                "type": "float",
+                "multiple": true
+            }
+        ],
+        "since": "0.1.0",
+        "group": "vector set"
+    },
+    "vset":{
         "summary": "Add a vector to a vector set, if exists, replace it", "complexity": "O(n)",
         "arguments": [
             {
